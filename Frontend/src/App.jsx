@@ -1,14 +1,13 @@
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom"; // Remove BrowserRouter import
-import { AuthProvider } from './components/authcontext';
+import { Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from './components/authcontext'; // FIX: Use AuthProvider instead of AuthContext
 import Register from "./pages/Register";
-import ChatApp from "./pages/chatapp";
+import ChatDashboard from "./components/Chatdashboard";
 import RequireAuth from "./components/requireAuth";
 
 function App() {
   return (
-    <AuthProvider>
-      {/* REMOVED the Router wrapper here */}
+    <AuthProvider> {/* FIX: Use AuthProvider (the component that provides context) */}
       <Routes>
         <Route path="/" element={<Navigate to="/register" replace />} />
         <Route path="/register" element={<Register />} />
@@ -16,7 +15,7 @@ function App() {
           path="/dashboard"
           element={
             <RequireAuth>
-              <ChatApp />
+              <ChatDashboard/>
             </RequireAuth>
           }
         />

@@ -1,19 +1,33 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
+const User = require("../Models/user");
 
-const protect = (req, res, next) => {
-  const token = req.cookies.token;
-
-  if (!token) return res.status(401).json({ message: 'Not authenticated' });
-
+const protect = async (req, res, next) => {
   try {
+    // FIX: Use consistent cookie name 'jwt'
+    const token = req.cookies.jwt;
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized, no token" });
+    }
+
+    // FIX: Use consistent payload structure
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    const user = await User.findById(decoded.userId).select("-password");
+
+    if (!user) {
+      return res.status(401).json({ message: "Unauthorized, user not found" });
+    }
+
+    req.user = user;
     req.token = token;
     next();
-  } catch (err) {
-    return res.status(403).json({ message: 'Token invalid' });
+  } catch (error) {
+    console.error("Error in protect middleware:", error.message);
+    return res.status(401).json({ message: "Unauthorized" });
   }
 };
 
 module.exports = protect;
+
+
+
 

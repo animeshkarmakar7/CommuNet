@@ -1,17 +1,19 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { AuthContext } from '../components/authcontext';
+import { useAuth } from './authcontext'; // Adjust path as needed
 
 const RequireAuth = ({ children }) => {
-  const { user } = useContext(AuthContext);
+  const { user, loading } = useAuth();
 
-  // If user exists, render the child components
-  if (user) {
-    return children;
+  if (loading) {
+    return <div>Loading...</div>; // Or your loading component
   }
 
-  // Otherwise, redirect to register page
-  return <Navigate to="/register" replace />;
+  if (!user) {
+    return <Navigate to="/register" replace />;
+  }
+
+  return children;
 };
 
 export default RequireAuth;

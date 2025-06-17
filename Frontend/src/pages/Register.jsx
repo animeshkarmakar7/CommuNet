@@ -2,11 +2,11 @@ import React, { useState, useEffect , useContext  } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import API from "../api"; // Adjust the path as necessary
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../components/authcontext"; // Adjust the path as necessary
+import { useAuth } from "../components/authcontext"; // Adjust the path as necessary
 
 
 const Register = () => {
-  const { setUser, setToken } = useContext(AuthContext);
+  const { setUser, setToken } = useAuth();
   const [isSignUp, setIsSignUp] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();

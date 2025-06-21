@@ -104,21 +104,20 @@ updateProfile: async (data) => {
       return;
     }
 
-    // ✅ Disconnect existing socket first
     get().disconnectSocket();
 
     console.log("Connecting socket for user:", authUser._id);
     
     const newSocket = io(BASE_URL, {
       query: { userId: authUser._id },
-      transports: ["websocket", "polling"], // Ensure fallback transport
+      transports: ["websocket", "polling"],
       timeout: 10000,
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
     });
 
-    // ✅ Handle connection events
+   
     newSocket.on("connect", () => {
       console.log("Socket connected:", newSocket.id);
       set({ socket: newSocket });
@@ -127,7 +126,6 @@ updateProfile: async (data) => {
     newSocket.on("disconnect", (reason) => {
       console.log("Socket disconnected:", reason);
       if (reason === "io server disconnect") {
-        // Server disconnected, try to reconnect
         newSocket.connect();
       }
     });
@@ -151,19 +149,19 @@ updateProfile: async (data) => {
       toast.error("Could not reconnect. Please refresh the page.");
     });
 
-    // ✅ Handle online users
+    
     newSocket.on("getOnlineUsers", (userIds) => {
       console.log("Online users updated:", userIds);
       set({ onlineUsers: userIds });
     });
 
-    // ✅ Handle server errors
+    
     newSocket.on("error", (error) => {
       console.error("Socket server error:", error);
       toast.error("Server error occurred");
     });
 
-    // Set socket immediately for connection attempts
+    
     set({ socket: newSocket });
   },
 
@@ -171,7 +169,7 @@ updateProfile: async (data) => {
     const { socket } = get();
     if (socket) {
       console.log("Disconnecting socket");
-      socket.removeAllListeners(); // ✅ Clean up all listeners
+      socket.removeAllListeners(); 
       if (socket.connected) {
         socket.disconnect();
       }
@@ -179,13 +177,13 @@ updateProfile: async (data) => {
     }
   },
 
-  // ✅ Add method to check socket status
+
   isSocketConnected: () => {
     const { socket } = get();
     return socket?.connected || false;
   },
 
-  // ✅ Add method to reconnect socket manually
+  
   reconnectSocket: () => {
     const { socket } = get();
     if (socket && !socket.connected) {

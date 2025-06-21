@@ -1,12 +1,11 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from './authcontext'; // Adjust path as needed
-
+import { useAuth } from './authcontext'; 
 const RequireAuth = ({ children }) => {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <div>Loading...</div>; // Or your loading component
+    return <div>Loading...</div>; 
   }
 
   if (!user) {

@@ -53,7 +53,6 @@ export const useChatStore = create((set, get) => ({
     }
 
     try {
-      // ✅ Send via API first
       const res = await API.post(
         `/messages/send/${selectedUser._id}`,
         messageData
@@ -65,7 +64,7 @@ export const useChatStore = create((set, get) => ({
         throw new Error("Invalid message response from server");
       }
 
-      // ✅ Add to local state immediately (optimistic update)
+     
       set((state) => {
         const messageExists = state.messages.some(msg => msg._id === newMessage._id);
         if (messageExists) return state;
@@ -75,7 +74,7 @@ export const useChatStore = create((set, get) => ({
         };
       });
 
-      // ✅ Then emit via socket for real-time delivery to receiver
+    
       if (socket?.connected) {
         socket.emit("sendMessage", newMessage);
       } else {
@@ -97,13 +96,13 @@ export const useChatStore = create((set, get) => ({
       return;
     }
 
-    // ✅ Clean up existing listeners
+  
     socket.off("newMessage");
     socket.off("messageDelivered");
     socket.off("userTyping");
     socket.off("messageRead");
 
-    // ✅ Handle incoming messages
+   
     socket.on("newMessage", (newMessage) => {
       console.log("Received new message:", newMessage);
 
@@ -119,7 +118,7 @@ export const useChatStore = create((set, get) => ({
         return;
       }
 
-      // ✅ Only add if it's relevant to current chat
+     
       const isChatRelevant = 
         (senderId === selectedUser._id && receiverId === authUser._id) ||
         (senderId === authUser._id && receiverId === selectedUser._id);
@@ -129,13 +128,13 @@ export const useChatStore = create((set, get) => ({
         return;
       }
 
-      // ✅ Only add if sender is NOT the current user (avoid duplicates)
+     
       if (senderId === authUser._id) {
         console.log("Ignoring own message from socket (already added via API)");
         return;
       }
 
-      // ✅ Add message to state
+     
       set((state) => {
         const messageExists = state.messages.some(msg => msg._id === _id);
         if (messageExists) {
@@ -149,13 +148,13 @@ export const useChatStore = create((set, get) => ({
       });
     });
 
-    // ✅ Handle delivery confirmations
+   
     socket.on("messageDelivered", ({ messageId, delivered, receiverId }) => {
       console.log(`Message ${messageId} delivery status:`, delivered);
-      // You can update message status in UI here
+    
     });
 
-    // ✅ Enhanced typing indicators with auto-cleanup
+  
     socket.on("userTyping", ({ senderId, isTyping }) => {
       console.log(`User ${senderId} typing status:`, isTyping);
       
@@ -167,7 +166,7 @@ export const useChatStore = create((set, get) => ({
           }
         }));
 
-        // ✅ Auto-cleanup: Remove typing status after 5 seconds
+      
         if (isTyping) {
           setTimeout(() => {
             set((state) => ({
@@ -181,10 +180,10 @@ export const useChatStore = create((set, get) => ({
       }
     });
 
-    // ✅ Handle read receipts
+    
     socket.on("messageRead", ({ messageId, readBy, readAt }) => {
       console.log(`Message ${messageId} read by ${readBy} at ${readAt}`);
-      // Update message read status in UI
+     
     });
 
     socket.on("error", (error) => {
@@ -207,7 +206,7 @@ export const useChatStore = create((set, get) => ({
   setSelectedUser: (selectedUser) => {
     get().unsubscribeMessages();
     
-    // ✅ Clear typing status when switching users
+    
     const clearedTypingUsers = {};
     Object.keys(get().typingUsers).forEach(userId => {
       clearedTypingUsers[userId] = false;
@@ -216,7 +215,7 @@ export const useChatStore = create((set, get) => ({
     set({ 
       selectedUser,
       messages: [],
-      typingUsers: clearedTypingUsers // ✅ Clear all typing indicators
+      typingUsers: clearedTypingUsers 
     });
     
     if (selectedUser) {
@@ -227,7 +226,7 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
-  // ✅ Enhanced typing indicators with debouncing
+
   sendTypingIndicator: (isTyping) => {
     const { selectedUser } = get();
     const { socket } = useAuthStore.getState();
@@ -242,7 +241,7 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
-  // ✅ Clear typing status for specific user
+ 
   clearTypingStatus: (userId) => {
     set((state) => ({
       typingUsers: {
@@ -252,7 +251,7 @@ export const useChatStore = create((set, get) => ({
     }));
   },
 
-  // ✅ Clear all typing indicators
+ 
   clearAllTypingStatus: () => {
     set((state) => {
       const clearedTypingUsers = {};

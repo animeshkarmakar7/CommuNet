@@ -7,10 +7,9 @@ const User = require('../Models/user');
 router.post('/register', register);
 router.post('/login', login);
 router.post('/logout', logout);
-// Add this line to your auth routes
 router.put('/profile', auth, updateProfile);
 
-// User Search
+
 router.get('/search', auth, async (req, res) => {
   const { name } = req.query;
 
@@ -34,7 +33,7 @@ router.get('/search', auth, async (req, res) => {
   }
 });
 
-// FIX: Use getProfile controller function
+
 router.get('/me', auth, getProfile);
 
 router.get('/users', auth, async (req, res) => {

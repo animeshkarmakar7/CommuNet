@@ -8,14 +8,8 @@ const cors = require('cors');
 const { app, server } = require('./lib/socket');
 const path = require('path');
 
-
-
 const PORT = process.env.PORT;
-// const __dirname = path.resolve();
 
-
-
-// ⬇️ CONNECT DB FUNCTION (inserted here)
 mongoose.connect(process.env.MONGO_URI)
 .then(() => {
   server.listen(5000, () => {
@@ -42,12 +36,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/messages', messageRoutes);
 
 
-// Serve frontend in production
-// if (process.env.NODE_ENV === 'production') {
-//     app.use(express.static(path.join(__dirname, '../client/dist')));
-//     app.get('*', (req, res) => {
-//         res.sendFile(path.join(__dirname, '../client', 'dist', 'index.html'));
-//     });
-// }
+
 
 

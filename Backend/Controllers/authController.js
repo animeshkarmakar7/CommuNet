@@ -38,12 +38,12 @@ exports.register = async (req, res) => {
 
     await user.save();
 
-    // FIX: Use consistent payload structure
+    
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { 
       expiresIn: '1d' 
     });
 
-    // FIX: Use consistent cookie name 'jwt'
+    
     res.cookie('jwt', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -73,24 +73,24 @@ exports.register = async (req, res) => {
   }
 };
 
-// Add this method to your authController.js
+
 
 exports.updateProfile = async (req, res) => {
   try {
-    const userId = req.user.id; // From auth middleware
+    const userId = req.user.id; 
     const { profilePic, name } = req.body;
 
-    // Validate input
+   
     if (!profilePic && !name) {
       return res.status(400).json({ message: 'At least one field is required to update' });
     }
 
-    // Build update object
+
     const updateData = {};
     if (profilePic) updateData.profilePic = profilePic;
     if (name) updateData.name = name;
 
-    // Update user
+
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       updateData,
@@ -126,10 +126,10 @@ exports.login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
 
-    // FIX: Use consistent payload structure
+   
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
-    // FIX: Use consistent cookie name 'jwt'
+   
     res.cookie('jwt', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -155,11 +155,11 @@ exports.login = async (req, res) => {
 
 exports.getProfile = async (req, res) => {
   try {
-    // FIX: Use consistent cookie name 'jwt'
+    
     const token = req.cookies.jwt;
     if (!token) return res.status(401).json({ message: 'No token provided' });
 
-    // FIX: Use consistent payload structure
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.userId).select('-password');
     if (!user) return res.status(404).json({ message: 'User not found' });

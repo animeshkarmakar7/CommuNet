@@ -63,7 +63,7 @@ const ChatDashboard = () => {
         setShowAddUsers={setShowAddUsers}
       />
       
-      {/* Mobile overlay */}
+    
       {isMobileOpen && (
         <div 
           className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-20"

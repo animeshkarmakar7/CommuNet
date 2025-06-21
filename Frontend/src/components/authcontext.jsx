@@ -1,10 +1,10 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import API from "../api"; // Adjust the import path as necessary
+import API from "../api"; 
 
-// Create the context
+
 const AuthContext = createContext();
 
-// Export the provider component
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
       })
       .catch((err) => {
         console.error("Auth check failed:", err);
-        // Clear any existing auth state on error
+       
         setUser(null);
         setToken(null);
       })
@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// Export the hook to use the context
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

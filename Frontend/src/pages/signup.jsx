@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import API from "../api"; // Adjust the path as necessary
+import API from "../api"; 
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../components/authcontext"; // Adjust the path as necessary
-
+import { useAuth } from "../components/authcontext"; 
 const SignUp = () => {
   const { setUser, setToken } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
@@ -16,7 +15,7 @@ const SignUp = () => {
     password: "",
   });
 
-  // Validation states
+  
   const [validationErrors, setValidationErrors] = useState({
     email: "",
     password: "",
@@ -25,7 +24,7 @@ const SignUp = () => {
   const [focusedField, setFocusedField] = useState("");
   const [particles, setParticles] = useState([]);
 
-  // Generate floating particles
+  
   useEffect(() => {
     const particleArray = [];
     for (let i = 0; i < 50; i++) {
@@ -40,7 +39,7 @@ const SignUp = () => {
     setParticles(particleArray);
   }, []);
 
-  // Email validation function
+  
   const validateEmail = (email) => {
     if (!email.includes('@')) {
       return "Email must contain @ symbol";
@@ -52,7 +51,7 @@ const SignUp = () => {
     return "";
   };
 
-  // Password validation function
+  
   const validatePassword = (password) => {
     if (password.length < 8) {
       return "Password must be at least 8 characters long";
@@ -71,7 +70,7 @@ const SignUp = () => {
       [name]: value,
     }));
 
-    // Real-time validation
+    
     if (name === 'email') {
       const emailError = validateEmail(value);
       setValidationErrors(prev => ({
@@ -92,7 +91,7 @@ const SignUp = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validate all fields before submission
+   
     const emailError = validateEmail(formData.email);
     const passwordError = validatePassword(formData.password);
     
@@ -101,7 +100,7 @@ const SignUp = () => {
       password: passwordError,
     });
 
-    // Check if there are any validation errors
+   
     if (emailError || passwordError) {
       alert("Please fix the validation errors before submitting");
       return;
@@ -126,12 +125,12 @@ const SignUp = () => {
   };
 
   const goToSignIn = () => {
-    navigate("/login"); // or wherever your login component is routed
+    navigate("/login"); 
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Animated Background Particles */}
+     
       <div className="absolute inset-0 pointer-events-none">
         {particles.map((particle) => (
           <div
@@ -150,7 +149,7 @@ const SignUp = () => {
         ))}
       </div>
 
-      {/* Animated Grid Background */}
+      
       <div
         className="absolute inset-0 opacity-10"
         style={{
@@ -160,13 +159,13 @@ const SignUp = () => {
         }}
       />
 
-      {/* Main Form Container */}
+      
       <div className="relative z-10 w-full max-w-md">
         <div
           className="bg-gradient-to-br from-white/10 via-white/5 to-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl p-8 shadow-2xl transform transition-all duration-1000 hover:scale-105"
           style={{ animation: "slideInUp 1s ease-out" }}
         >
-          {/* Header */}
+         
           <div
             className="text-center mb-8"
             style={{ animation: "fadeInDown 1s ease-out" }}
@@ -183,9 +182,9 @@ const SignUp = () => {
             />
           </div>
 
-          {/* Sign Up Form */}
+          
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Full Name Field */}
+            
             <div className="relative group">
               <input
                 type="text"
@@ -210,7 +209,7 @@ const SignUp = () => {
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-white to-gray-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300 pointer-events-none" />
             </div>
 
-            {/* Email Field */}
+            
             <div className="relative group">
               <input
                 type="email"
@@ -242,7 +241,7 @@ const SignUp = () => {
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-white to-gray-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300 pointer-events-none" />
             </div>
 
-            {/* Mobile Number Field */}
+            
             <div className="relative group">
               <input
                 type="number"
@@ -267,7 +266,7 @@ const SignUp = () => {
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-white to-gray-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300 pointer-events-none" />
             </div>
 
-            {/* Password Field */}
+            
             <div className="relative group">
               <input
                 type={showPassword ? "text" : "password"}
@@ -294,7 +293,7 @@ const SignUp = () => {
                 Password
               </label>
 
-              {/* Eye Toggle Button */}
+              
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
@@ -313,7 +312,7 @@ const SignUp = () => {
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-white to-gray-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300 pointer-events-none" />
             </div>
 
-            {/* Password Requirements Info */}
+            
             <div className="text-xs text-gray-400 ml-2 space-y-1">
               <p>Password must contain:</p>
               <p className={formData.password.length >= 8 ? "text-green-400" : "text-gray-400"}>
@@ -324,7 +323,7 @@ const SignUp = () => {
               </p>
             </div>
 
-            {/* Submit Button */}
+            
             <button
               type="submit"
               className="w-full py-4 bg-gradient-to-r from-white to-gray-200 text-black font-bold rounded-2xl hover:from-gray-100 hover:to-white transform transition-all duration-300 hover:scale-105 hover:shadow-2xl active:scale-95 relative overflow-hidden group"
@@ -334,7 +333,7 @@ const SignUp = () => {
             </button>
           </form>
 
-          {/* Footer */}
+          
           <div
             className="text-center mt-8"
             style={{ animation: "fadeInUp 1s ease-out 0.5s both" }}

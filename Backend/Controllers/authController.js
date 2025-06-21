@@ -16,9 +16,9 @@ exports.register = async (req, res) => {
   try {
     console.log("Register request body:", req.body);
 
-    const { name, email, password, mobile, dob } = req.body;
+    const { name, email, password, mobile} = req.body;
 
-    if (!name || !email || !password || !mobile || !dob) {
+    if (!name || !email || !password || !mobile ) {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
@@ -32,8 +32,8 @@ exports.register = async (req, res) => {
       name, 
       email, 
       password: hashedPassword,
-      mobile,
-      dob
+      mobile
+     
     });
 
     await user.save();
@@ -70,6 +70,45 @@ exports.register = async (req, res) => {
         message: err.message || 'Registration failed' 
       });
     }
+  }
+};
+
+// Add this method to your authController.js
+
+exports.updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.id; // From auth middleware
+    const { profilePic, name } = req.body;
+
+    // Validate input
+    if (!profilePic && !name) {
+      return res.status(400).json({ message: 'At least one field is required to update' });
+    }
+
+    // Build update object
+    const updateData = {};
+    if (profilePic) updateData.profilePic = profilePic;
+    if (name) updateData.name = name;
+
+    // Update user
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      updateData,
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json({
+      message: 'Profile updated successfully',
+      user: updatedUser
+    });
+
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({ message: 'Failed to update profile' });
   }
 };
 
@@ -133,16 +172,11 @@ exports.getProfile = async (req, res) => {
 
 exports.logout = (req, res) => {
   try {
-    // FIX: Use consistent cookie name 'jwt'
-    res.clearCookie('jwt', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'Strict'
-    });
-
-    res.status(200).json({ message: 'Logged out successfully' });
-  } catch (err) {
-    console.error("Logout error:", err);
-    res.status(500).json({ message: 'Server error' });
+    res.cookie("jwt","",{maxAge:0})
+  res.status(200).json({message: "Logged out Successfully"})
+  } catch (error) {
+    console.log("Error in logout controller",error.messages);
+    res.status(500).json({message: "Internal Server error"})
+    
   }
 };

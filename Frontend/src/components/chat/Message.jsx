@@ -13,6 +13,7 @@ const Message = ({ message, authUser }) => {
 
   const isOwn = message.senderId === authUser._id;
 
+  // ✅ Enhanced timestamp formatting - Shows proper time format
   const formatTime = (timestamp) => {
     if (!timestamp) return 'Now';
     
@@ -26,26 +27,87 @@ const Message = ({ message, authUser }) => {
       
       const now = new Date();
       const diffInSeconds = Math.floor((now - date) / 1000);
+      const diffInDays = Math.floor(diffInSeconds / 86400);
       
-      // ✅ Show relative time for recent messages
-      if (diffInSeconds < 60) {
+      // ✅ Show "Just now" only for messages less than 30 seconds old
+      if (diffInSeconds < 30) {
         return 'Just now';
-      } else if (diffInSeconds < 3600) {
-        const minutes = Math.floor(diffInSeconds / 60);
-        return `${minutes}m ago`;
-      } else if (diffInSeconds < 86400) {
-        const hours = Math.floor(diffInSeconds / 3600);
-        return `${hours}h ago`;
-      } else {
-        // ✅ Show time for older messages
+      }
+      
+      // ✅ For messages from today, show time (11:30 PM)
+      if (diffInDays === 0) {
         return date.toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit'
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
         });
       }
+      
+      // ✅ For messages from yesterday
+      if (diffInDays === 1) {
+        return `Yesterday ${date.toLocaleTimeString([], {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
+        })}`;
+      }
+      
+      // ✅ For messages from this week (within 7 days)
+      if (diffInDays < 7) {
+        const dayName = date.toLocaleDateString([], { weekday: 'short' });
+        return `${dayName} ${date.toLocaleTimeString([], {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
+        })}`;
+      }
+      
+      // ✅ For older messages, show date and time
+      if (diffInDays < 365) {
+        return date.toLocaleDateString([], {
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
+        });
+      }
+      
+      // ✅ For messages older than a year
+      return date.toLocaleDateString([], {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+      
     } catch (error) {
       console.error('Date formatting error:', error);
       return 'Now';
+    }
+  };
+
+  // ✅ Get detailed timestamp for tooltip
+  const getDetailedTimestamp = (timestamp) => {
+    if (!timestamp) return 'Unknown time';
+    
+    try {
+      const date = new Date(timestamp);
+      if (isNaN(date.getTime())) return 'Unknown time';
+      
+      return date.toLocaleString([], {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+      });
+    } catch (error) {
+      return 'Unknown time';
     }
   };
 
@@ -113,20 +175,24 @@ const Message = ({ message, authUser }) => {
           </div>
         )}
 
-        {/* ✅ Enhanced timestamp */}
+        {/* ✅ Enhanced timestamp with tooltip */}
         <div className={`text-xs mt-1 flex items-center justify-between ${
           isOwn ? 'text-blue-200' : 'text-gray-400'
         }`}>
-          <time dateTime={message.createdAt}>
+          <time 
+            dateTime={message.createdAt}
+            title={getDetailedTimestamp(message.createdAt)} // ✅ Detailed timestamp on hover
+            className="cursor-help"
+          >
             {formatTime(message.createdAt || Date.now())}
           </time>
           
           {/* ✅ Debug info (remove in production) */}
-          {process.env.NODE_ENV === 'development' && (
+          {/* {process.env.NODE_ENV === 'development' && (
             <span className="ml-2 text-xs opacity-50">
               ID: {message._id?.slice(-4)}
             </span>
-          )}
+          )} */}
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback , useState } from 'react';
 import { MessageCircle, Loader2 } from 'lucide-react';
 import { useAuthStore } from '../../Socket/useAuth';
 import { useChatStore } from '../../Socket/useSocket';
@@ -14,11 +14,13 @@ const ChatArea = ({ setIsMobileOpen, setShowProfile }) => {
     getMessages,
     subscribeToMessages,
     unsubscribeMessages,
-    removeDuplicateMessages // ✅ Add this method to clean duplicates
+    removeDuplicateMessages ,
+    typingUsers
   } = useChatStore();
 
   const { authUser } = useAuthStore();
   const messagesEndRef = useRef(null);
+  
 
   // ✅ Memoized scroll function
   const scrollToBottom = useCallback(() => {
@@ -48,10 +50,10 @@ const ChatArea = ({ setIsMobileOpen, setShowProfile }) => {
 
   // ✅ Scroll when messages change
   useEffect(() => {
-    if (messages.length > 0) {
+    if (messages.length > 0 || (selectedUser && typingUsers[selectedUser._id])) {
       scrollToBottom();
     }
-  }, [messages.length, scrollToBottom]); // ✅ Use length instead of whole array
+  }, [messages.length, selectedUser?._id, typingUsers, scrollToBottom]); // ✅ Use length instead of whole array
 
   // ✅ Clean up duplicates periodically
   useEffect(() => {
@@ -67,7 +69,7 @@ const ChatArea = ({ setIsMobileOpen, setShowProfile }) => {
   // ✅ DEBUG: Log messages (less verbose)
   useEffect(() => {
     if (messages.length > 0) {
-      console.log(`📨 ${messages.length} messages for ${selectedUser?.fullName || 'unknown'}`);
+      console.log(`📨 ${messages.length} messages for ${selectedUser?.name || 'unknown'}`);
       // Log only the last message for debugging
       const lastMessage = messages[messages.length - 1];
       console.log("Last message:", {
@@ -77,7 +79,31 @@ const ChatArea = ({ setIsMobileOpen, setShowProfile }) => {
         createdAt: lastMessage.createdAt
       });
     }
-  }, [messages.length, selectedUser?.fullName]);
+  }, [messages.length, selectedUser?.name]);
+
+   const TypingIndicator = () => {
+    const isTyping = selectedUser && typingUsers[selectedUser._id];
+    
+    if (!isTyping) return null;
+
+      return (
+      <div className="flex justify-start mb-4 animate-fade-in">
+        <div className="px-4 py-2 rounded-lg bg-gray-800 text-white w-fit max-w-[80%] shadow-md">
+          <div className="flex items-center space-x-1">
+            <span className="text-sm text-gray-300">
+              {selectedUser.name || selectedUser.username} is typing
+            </span>
+            <div className="flex space-x-1">
+              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
 
   if (!selectedUser) {
     return (
@@ -125,6 +151,7 @@ const ChatArea = ({ setIsMobileOpen, setShowProfile }) => {
                 />
               );
             })}
+               <TypingIndicator />
             <div ref={messagesEndRef} />
           </>
         )}

@@ -1,12 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const { login, register, getProfile, logout } = require('../Controllers/authController');
+const { login, register, getProfile,updateProfile ,  logout } = require('../Controllers/authController');
 const auth = require('../middleware/auth');
 const User = require('../Models/user'); 
 
 router.post('/register', register);
 router.post('/login', login);
 router.post('/logout', logout);
+// Add this line to your auth routes
+router.put('/profile', auth, updateProfile);
 
 // User Search
 router.get('/search', auth, async (req, res) => {

@@ -9,7 +9,7 @@ export const useChatStore = create((set, get) => ({
   selectedUser: null,
   isUsersLoading: false,
   isMessagesLoading: false,
-  typingUsers: {},
+  typingUsers: {}, 
 
   addUserIfNotExists: (newUser) => {
     const users = get().users;
@@ -155,8 +155,10 @@ export const useChatStore = create((set, get) => ({
       // You can update message status in UI here
     });
 
-    // ✅ Handle typing indicators
+    // ✅ Enhanced typing indicators with auto-cleanup
     socket.on("userTyping", ({ senderId, isTyping }) => {
+      console.log(`User ${senderId} typing status:`, isTyping);
+      
       if (senderId === selectedUser._id) {
         set((state) => ({
           typingUsers: {
@@ -164,6 +166,18 @@ export const useChatStore = create((set, get) => ({
             [senderId]: isTyping
           }
         }));
+
+        // ✅ Auto-cleanup: Remove typing status after 5 seconds
+        if (isTyping) {
+          setTimeout(() => {
+            set((state) => ({
+              typingUsers: {
+                ...state.typingUsers,
+                [senderId]: false
+              }
+            }));
+          }, 5000);
+        }
       }
     });
 
@@ -193,10 +207,16 @@ export const useChatStore = create((set, get) => ({
   setSelectedUser: (selectedUser) => {
     get().unsubscribeMessages();
     
+    // ✅ Clear typing status when switching users
+    const clearedTypingUsers = {};
+    Object.keys(get().typingUsers).forEach(userId => {
+      clearedTypingUsers[userId] = false;
+    });
+    
     set({ 
       selectedUser,
       messages: [],
-      typingUsers: {}
+      typingUsers: clearedTypingUsers // ✅ Clear all typing indicators
     });
     
     if (selectedUser) {
@@ -207,17 +227,40 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
-  // ✅ Typing indicators
+  // ✅ Enhanced typing indicators with debouncing
   sendTypingIndicator: (isTyping) => {
     const { selectedUser } = get();
     const { socket } = useAuthStore.getState();
     
     if (selectedUser && socket?.connected) {
+      console.log(`Sending typing indicator: ${isTyping} to ${selectedUser._id}`);
+      
       socket.emit("typing", {
         receiverId: selectedUser._id,
         isTyping
       });
     }
+  },
+
+  // ✅ Clear typing status for specific user
+  clearTypingStatus: (userId) => {
+    set((state) => ({
+      typingUsers: {
+        ...state.typingUsers,
+        [userId]: false
+      }
+    }));
+  },
+
+  // ✅ Clear all typing indicators
+  clearAllTypingStatus: () => {
+    set((state) => {
+      const clearedTypingUsers = {};
+      Object.keys(state.typingUsers).forEach(userId => {
+        clearedTypingUsers[userId] = false;
+      });
+      return { typingUsers: clearedTypingUsers };
+    });
   },
 
   removeDuplicateMessages: () => {

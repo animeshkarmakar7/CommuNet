@@ -65,31 +65,37 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  logout: async () => {
-    try {
-      await axiosInstance.post("/auth/logout");
-      set({ authUser: null });
-      localStorage.removeItem("authUser");
-      toast.success("Logged out successfully");
-      get().disconnectSocket();
-    } catch (error) {
-      get().handleError(error, "Logout failed");
-    }
-  },
+logout: async () => {
+  try {
+    await axiosInstance.post("/auth/logout");
+    set({ authUser: null });
+    localStorage.removeItem("authUser");
+    toast.success("Logged out successfully");
+    get().disconnectSocket();
+    
+    window.location.href = '/signup';
+  } catch (error) {
+    get().handleError(error, "Logout failed");
+  }
+},
 
-  updateProfile: async (data) => {
-    set({ isUpdatingProfile: true });
-    try {
-      const res = await axiosInstance.put("/auth/update-profile", data);
-      set({ authUser: res.data });
-      localStorage.setItem("authUser", JSON.stringify(res.data));
-      toast.success("Profile updated successfully");
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Update failed");
-    } finally {
-      set({ isUpdatingProfile: false });
-    }
-  },
+updateProfile: async (data) => {
+  set({ isUpdatingProfile: true });
+  try {
+    const res = await axiosInstance.put("/auth/profile", data);
+    const updatedUser = res.data.user;
+    set({ authUser: updatedUser });
+    localStorage.setItem("authUser", JSON.stringify(updatedUser));
+    toast.success("Profile updated successfully");
+    return updatedUser;
+  } catch (error) {
+    console.error('Update profile error:', error);
+    toast.error(error.response?.data?.message || "Update failed");
+    throw error;
+  } finally {
+    set({ isUpdatingProfile: false });
+  }
+},
 
   connectSocket: () => {
     const { authUser } = get();

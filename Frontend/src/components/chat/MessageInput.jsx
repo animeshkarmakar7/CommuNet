@@ -7,7 +7,9 @@ const MessageInput = () => {
   const [text, setText] = useState('');
   const [image, setImage] = useState(null);
   const [isSending, setIsSending] = useState(false);
+  const [isTyping, setIsTyping] = useState(false); // ✅ Track local typing state
   const fileInputRef = useRef(null);
+  const typingTimeoutRef = useRef(null); // ✅ Use useRef instead of window
   const { sendMessage, selectedUser, sendTypingIndicator } = useChatStore();
 
   const handleSend = async () => {
@@ -20,6 +22,12 @@ const MessageInput = () => {
 
     setIsSending(true);
     
+    // ✅ Stop typing indicator immediately when sending
+    if (sendTypingIndicator && isTyping) {
+      sendTypingIndicator(false);
+      setIsTyping(false);
+    }
+    
     try {
       await sendMessage({
         text: text.trim(),
@@ -29,11 +37,6 @@ const MessageInput = () => {
       // ✅ Clear form only after successful send
       setText('');
       setImage(null);
-      
-      // ✅ Stop typing indicator
-      if (sendTypingIndicator) {
-        sendTypingIndicator(false);
-      }
       
     } catch (error) {
       console.error('Send message error:', error);
@@ -76,31 +79,66 @@ const MessageInput = () => {
     }
   };
 
-  // ✅ Handle typing indicators
+  // ✅ Enhanced typing indicators with better timing
   const handleTextChange = (e) => {
-    setText(e.target.value);
+    const newText = e.target.value;
+    setText(newText);
     
-    // ✅ Send typing indicator
-    if (sendTypingIndicator && selectedUser) {
+    if (!sendTypingIndicator || !selectedUser) return;
+
+    // ✅ Clear existing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    // ✅ If user is typing (has text) and not already marked as typing
+    if (newText.trim() && !isTyping) {
+      setIsTyping(true);
       sendTypingIndicator(true);
-      
-      // ✅ Stop typing indicator after 3 seconds of inactivity
-      clearTimeout(window.typingTimer);
-      window.typingTimer = setTimeout(() => {
-        sendTypingIndicator(false);
-      }, 3000);
+    }
+
+    // ✅ If user stopped typing (no text) and was typing
+    if (!newText.trim() && isTyping) {
+      setIsTyping(false);
+      sendTypingIndicator(false);
+      return;
+    }
+
+    // ✅ Set timeout to stop typing indicator after 2 seconds of inactivity
+    if (newText.trim()) {
+      typingTimeoutRef.current = setTimeout(() => {
+        if (isTyping) {
+          setIsTyping(false);
+          sendTypingIndicator(false);
+        }
+      }, 2000); // ✅ Reduced from 3000ms to 2000ms for better UX
     }
   };
 
-  // ✅ Stop typing when component unmounts
+  // ✅ Stop typing when component unmounts or selected user changes
   React.useEffect(() => {
     return () => {
+      if (sendTypingIndicator && isTyping) {
+        sendTypingIndicator(false);
+      }
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, [sendTypingIndicator, isTyping]);
+
+  // ✅ Reset typing state when selectedUser changes
+  React.useEffect(() => {
+    if (isTyping) {
+      setIsTyping(false);
       if (sendTypingIndicator) {
         sendTypingIndicator(false);
       }
-      clearTimeout(window.typingTimer);
-    };
-  }, [sendTypingIndicator]);
+    }
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+  }, [selectedUser?._id]);
 
   return (
     <div className="p-4 border-t border-gray-800 bg-gray-900">
@@ -140,7 +178,7 @@ const MessageInput = () => {
             onChange={handleTextChange}
             onKeyPress={handleKeyPress}
             disabled={isSending}
-            placeholder={selectedUser ? `Message ${selectedUser.fullName || selectedUser.username}...` : "Select a user to start messaging..."}
+            placeholder={selectedUser ? `Message ${selectedUser.name || selectedUser.username}...` : "Select a user to start messaging..."}
             className="w-full px-4 py-2 bg-gray-800 text-white rounded-full border border-gray-700 focus:border-blue-500 focus:outline-none transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </div>

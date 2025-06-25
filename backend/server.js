@@ -10,6 +10,19 @@ const path = require('path');
 
 const PORT = process.env.PORT;
 
+const originalAppUse = app.use.bind(app);
+
+app.use = function (path, ...handlers) {
+  if (typeof path === 'string') {
+    console.log('🛠 app.use path:', path);  // Log all routes being registered
+    if (path.trim() === '/:') {
+      throw new Error('🚨 Invalid route "/:" found!');
+    }
+  }
+  return originalAppUse(path, ...handlers);
+};
+
+
 
 mongoose.connect(process.env.MONGO_URI)
 .then(() => {

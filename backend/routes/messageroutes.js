@@ -4,13 +4,7 @@ const { getMessages, getUsers, sendMessages } = require('../Controllers/msgContr
 
 const router = express.Router();
 
-console.log({
-  protect,
-  getMessages,
-  getUsers,
-  sendMessages
-});
-console.log('Message routes loaded successfully');
+
 
 router.get('/users', protect, getUsers);
 router.get('/:id', protect, getMessages);

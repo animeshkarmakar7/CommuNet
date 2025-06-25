@@ -9,7 +9,7 @@ const { app, server } = require('./lib/socket');
 const path = require('path');
 
 const PORT = process.env.PORT;
-const __dirname = path.resolve();
+
 
 mongoose.connect(process.env.MONGO_URI)
 .then(() => {

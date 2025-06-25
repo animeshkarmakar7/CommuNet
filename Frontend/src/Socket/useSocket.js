@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import toast from "react-hot-toast";
-import { useAuthStore } from "../Socket/useAuth";
+import { useAuthStore } from "./useAuth";
 import API from "../api";
 
 export const useChatStore = create((set, get) => ({
